@@ -694,19 +694,20 @@ def create_db(args,extra_files = None):
 
 
 
-def get_variable_file_name(software_name,library_name):
-    library_prefix = f"{sys.base_prefix}/share/{software_name}/{library_name}"
+def get_variable_file_name(software_name,library_name,prefix):
+    library_prefix = f"{library_name}/{prefix}"
+
     return f"{library_prefix}.variables.json"
 
-def get_db(software_name,db_name):
-    print(software_name)
-    print(db_name)
+def get_db(software_name,db_name, prefix):
+    # print(software_name)
+    # print(db_name)
     if "/" in db_name:
         share_path = "/".join(db_name.split("/"))
     else:
         share_path = f"{sys.base_prefix}/share/{software_name}/"
-    print(share_path)
-    variable_file_name = get_variable_file_name(software_name,db_name)
+    # print(share_path)
+    variable_file_name = get_variable_file_name(software_name,db_name, prefix)
     if not os.path.isfile(variable_file_name):
         return None
     variables = json.load(open(variable_file_name))
