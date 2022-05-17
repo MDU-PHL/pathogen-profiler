@@ -32,6 +32,7 @@ def test_vcf_for_lofreq(vcf_file):
     return lofreq
 
 def run_profiler(args):
+    # print(args)
     if args.read1 or args.bam:
         args.bam_file = get_bam_file(args)
         results = bam_profiler(
@@ -89,8 +90,10 @@ def speciate(args,bam_region=None):
     return {"prediction_method":"kmers","prediction":species,"species_db_version":conf['version']}
 
 def get_bam_file(args):
+    # print(args)
     ### Create bam file if fastq has been supplied ###
     if args.bam is None:
+        # print(args.conf)
         if args.read1 and args.read2 and args.no_trim:
             # Paired + no trimming
             fastq_obj = fastq(args.read1,args.read2)

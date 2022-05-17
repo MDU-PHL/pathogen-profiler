@@ -271,6 +271,9 @@ def get_snpeff_formated_mutation_list(csv_file,ref,gff,snpEffDB):
         if r:
             del_start = int(r.group(1))
             del_end = int(r.group(2))
+            if del_end < del_start: # added in to address some issues with conversion between TBP and WHO
+                del_end = int(r.group(1))
+                del_start = int(r.group(2))
             if gene.strand == "+":
                # "embA" "c.-29_-28del"
                 genome_start = gene.start + del_start - 1
@@ -279,7 +282,10 @@ def get_snpeff_formated_mutation_list(csv_file,ref,gff,snpEffDB):
                 # "alr" "c.-283_-280delCAAT"
                 genome_start = gene.start - del_end - 1
                 genome_end = gene.start - del_start + 1
-            ref = refseq[gene.chrom][genome_start-1:genome_end-1]
+            # print(refseq[gene.chrom])
+            gs = genome_start-1 if genome_start<genome_end else genome_end-1
+            ge = genome_end-1 if genome_end-1>genome_start else genome_start-1
+            ref = refseq[gene.chrom][gs:ge]
             alt = ref[0]
             mutations[(row["Gene"],row["Mutation"])] = {"chrom":gene.chrom,"pos":genome_start, "ref":ref, "alt":alt,"gene":row["Gene"],"type":"nucleotide"}
 
@@ -644,7 +650,7 @@ def create_db(args,extra_files = None):
             ref_fasta_dict = fa2dict(genome_file)
             write_bed(db,locus_tag_to_drug_dict,genes,ref_fasta_dict,bed_file)
             variables['amplicon'] = False
-        
+        print(extra_files)
         for file in extra_files.values():
             target = f"{args.prefix}.{file}"
             shutil.copyfile(file,target)
@@ -693,10 +699,13 @@ def get_variable_file_name(software_name,library_name):
     return f"{library_prefix}.variables.json"
 
 def get_db(software_name,db_name):
+    print(software_name)
+    print(db_name)
     if "/" in db_name:
         share_path = "/".join(db_name.split("/"))
     else:
         share_path = f"{sys.base_prefix}/share/{software_name}/"
+    print(share_path)
     variable_file_name = get_variable_file_name(software_name,db_name)
     if not os.path.isfile(variable_file_name):
         return None
